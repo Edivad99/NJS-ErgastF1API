@@ -1,0 +1,17 @@
+ergastdb:
+  container_name: ergastdb
+  build: ergastdb/
+  environment:
+    MYSQL_ROOT_PASSWORD: f1
+    MYSQL_DATABASE: ergastdb
+  expose:
+    - "3306"
+  ports:
+    - '3306:3306'
+  command: --default-authentication-plugin=mysql_native_password
+web:
+  build: .
+  ports:
+    - '8080:8732'
+  links:
+    - ergastdb:ergastdb

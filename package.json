@@ -1,0 +1,21 @@
+{
+  "name": "njs-f1-api",
+  "version": "1.0.0",
+  "description": "Switching from PHP to nodeJS, of the ergast.com API services",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Davide Albiero",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "morgan": "^1.9.1",
+    "mysql": "^2.17.1",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
