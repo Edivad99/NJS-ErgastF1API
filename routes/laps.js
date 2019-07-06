@@ -162,7 +162,10 @@ router.get("", (req,res) => {
             json.MRData.RaceTable.driverId = driver;
         if(laps)
             json.MRData.RaceTable.lap = laps;
-        json.MRData.RaceTable.Races = [formattedRaces(rows)];
+        if(rows.length > 0)
+            json.MRData.RaceTable.Races = [formattedRaces(rows)];
+        else
+            json.MRData.RaceTable.Races = [];
         res.json(json);
     });
 });
