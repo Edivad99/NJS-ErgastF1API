@@ -2,7 +2,7 @@ const mysql = require("mysql");
 
 const pool = mysql.createPool({
     connectionLimit : 20,
-    host : "ergastdb",
+    host : "database",
     port : "3306",
     user : "root",
     password : "f1",
