@@ -10,6 +10,8 @@ function formattedResultsRow(row)
     return { 
         number : row.number.toString(),
         position : (row.position != null) ? row.position.toString() : "N/D",
+        positionText : row.positionText,
+        points : row.points.toString(),
         Driver : {
             driverId: row.driverRef,
             permanentNumber : (row.driverNumber != null) ? row.driverNumber.toString() : "",
@@ -47,71 +49,51 @@ function formattedResultsRow(row)
     }
 }
 
-function formattedRaceResults(rows)
+function heading(row)
 {
-    if(Array.isArray(rows))
-    {
-        return rows.map((row) => {
-            return formattedResultsRow(row)
-        });
-    }
-    else
-    {
-        return formattedResultsRow(rows);
-    }
-    
+    return {
+        season : row.year.toString(),
+        round : row.round.toString(),
+        url : row.raceUrl,
+        raceName : row.raceName,
+        Circuit : {
+            circuitId : row.circuitRef,
+            url : row.url,
+            circuitName : row.name,
+            Location : {
+                lat : row.lat.toString(),
+                long : row.lng.toString(),
+                alt : (row.alt != null) ?  row.alt.toString() : "N/D",
+                locality : row.location,
+                country : row.country
+            }
+        },
+        date : row.raceDate,
+        time : (row.raceTime != null) ? row.raceTime + "Z" : "N/D",
+        Results : [formattedResultsRow(row)]
+    };
 }
 
 function formattedRace(rows)
 {
-    return {
-        season : rows[0].year.toString(),
-        round : rows[0].round.toString(),
-        url : rows[0].raceUrl,
-        raceName : rows[0].raceName,
-        Circuit : {
-            circuitId : rows[0].circuitRef,
-            url : rows[0].url,
-            circuitName : rows[0].name,
-            Location : {
-                lat : rows[0].lat.toString(),
-                long : rows[0].lng.toString(),
-                alt : (rows[0].alt != null) ?  rows[0].alt.toString() : "N/D",
-                locality : rows[0].location,
-                country : rows[0].country
-            }
-        },
-        date : rows[0].raceDate,
-        time : (rows[0].raceTime != null) ? rows[0].raceTime + "Z" : "N/D",
-        Results : formattedRaceResults(rows)
-    };
-}
+    let currentYear = 0;
+    let currentRound = 0;
+    let results = [];
 
-function formattedRaceWithoutYear(rows)
-{
-    return rows.map((row)=>{
-        return {
-            season : row.year.toString(),
-            round : row.round.toString(),
-            url : row.raceUrl,
-            raceName : row.raceName,
-            Circuit : {
-                circuitId : row.circuitRef,
-                url : row.url,
-                circuitName : row.name,
-                Location : {
-                    lat : row.lat.toString(),
-                    long : row.lng.toString(),
-                    alt : (row.alt != null) ?  row.alt.toString() : "N/D",
-                    locality : row.location,
-                    country : row.country
-                }
-            },
-            date : row.raceDate,
-            time : (row.raceTime != null) ? row.raceTime + "Z" : "N/D",
-            Results : [formattedRaceResults(row)]
+    rows.forEach((row) => {
+        if(row.year != currentYear || row.round != currentRound)
+        {
+            currentYear = row.year;
+            currentRound = row.round;
+            results.push(heading(row));
+            //console.log(currentYear + " " + currentRound);
+        }
+        else
+        {
+            results[results.length - 1].Results.push(formattedResultsRow(row));
         }
     });
+    return results;
 }
 
 router.get("", (req,res) => {
@@ -222,10 +204,8 @@ router.get("", (req,res) => {
         if(round)
             json.MRData.RaceTable.round = round;
 
-        if(year && round && rows)
-            json.MRData.RaceTable.Races = [formattedRace(rows)];
-        else
-            json.MRData.RaceTable.Races = formattedRaceWithoutYear(rows);
+        json.MRData.RaceTable.Races = formattedRace(rows);
+
         res.json(json);
     });
 });
