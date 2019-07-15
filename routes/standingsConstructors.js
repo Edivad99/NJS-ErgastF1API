@@ -5,46 +5,49 @@ const path = require("path");
 let MySQLConfiguration = require("../connection.js");
 
 //Supported Function
-function formattedConstructorStandings(rows)
+function formattedConstructorStandings(row)
 {
-    const position = rows.map((row) => {
-        return { 
-            position : row.position.toString(),
-            positionText : row.positionText,
-            points : row.points.toString(),
-            wins : row.wins.toString(),
-            Constructor : {
-                constructorId : row.constructorRef,
-                url : row.url,
-                name : row.name,
-                nationality : row.nationality
-            }
-        };
-    });
-    return position;
+    return { 
+        position : row.position.toString(),
+        positionText : row.positionText,
+        points : row.points.toString(),
+        wins : row.wins.toString(),
+        Constructor : {
+            constructorId : row.constructorRef,
+            url : row.url,
+            name : row.name,
+            nationality : row.nationality
+        }
+    };
 }
 
-function formattedStandingsLists(rows)
+function heading(row)
 {
-    const winnerThisYear = rows.map((row) => {
-        return { 
-            season : row.year.toString(),
-            round : row.round.toString(),
-            ConstructorStandings : [{
-                position : row.position.toString(),
-                positionText : row.positionText,
-                points : row.points.toString(),
-                wins : row.wins.toString(),
-                Constructor : {
-                    constructorId : row.constructorRef,
-                    url : row.url,
-                    name : row.name,
-                    nationality : row.nationality
-                }
-            }]
-        };
+    return {
+        season : row.year.toString(),
+        round : row.round.toString(),
+        ConstructorStandings : [formattedConstructorStandings(row)]
+    };
+}
+
+function formattedStandings(rows)
+{
+    let currentYear = 0;
+    let ConstructorStandings = [];
+
+    rows.forEach((row) => {
+        if(row.year != currentYear)
+        {
+            currentYear = row.year;
+            ConstructorStandings.push(heading(row));
+            //console.log(currentYear);
+        }
+        else
+        {
+            ConstructorStandings[ConstructorStandings.length - 1].ConstructorStandings.push(formattedConstructorStandings(row));
+        }
     });
-    return winnerThisYear;
+    return ConstructorStandings;
 }
 
 router.get("", (req,res) => {
@@ -144,14 +147,8 @@ router.get("", (req,res) => {
             json.MRData.StandingsTable.round = round;
         if(constructorStandings)
             json.MRData.StandingsTable.constructorStandings = constructorStandings;
-        if(year && rows>0)
-            json.MRData.StandingsTable.StandingsLists = [{
-                "season" : year,
-                "round" : rows[0].round.toString(),
-                "ConstructorStandings" : formattedConstructorStandings(rows)
-            }] 
-        else
-            json.MRData.StandingsTable.StandingsLists = formattedStandingsLists(rows);
+
+        json.MRData.StandingsTable.StandingsLists = formattedStandings(rows);
         res.json(json);
     });
 });

@@ -5,6 +5,31 @@ const path = require("path");
 let MySQLConfiguration = require("../connection.js");
 
 //Supported Function
+function heading(row)
+{
+    return {
+        season : row.year.toString(),
+        round : row.round.toString(),
+        url : row.raceUrl,
+        raceName : row.raceName,
+        Circuit : {
+            circuitId : row.circuitRef,
+            url : row.url,
+            circuitName : row.name,
+            Location : {
+                lat : row.lat.toString(),
+                long : row.lng.toString(),
+                alt : (row.alt != null) ?  row.alt.toString() : "N/D",
+                locality : row.location,
+                country : row.country
+            }
+        },
+        date : row.date,
+        time : (row.time != null) ? row.time + "Z" : "N/D",
+        QualifyingResults : [formattedQualifyingRow(row)]
+    };
+}
+
 function formattedQualifyingRow(row)
 {
     return { 
@@ -32,72 +57,28 @@ function formattedQualifyingRow(row)
     }
 }
 
-function formattedQualifyingResults(rows)
-{
-    if(Array.isArray(rows))
-    {
-        return rows.map((row) => {
-            return formattedQualifyingRow(row)
-        });
-    }
-    else
-    {
-        return formattedQualifyingRow(rows);
-    }
-    
-}
-
 function formattedQualifying(rows)
 {
-    return {
-        season : rows[0].year.toString(),
-        round : rows[0].round.toString(),
-        url : rows[0].raceUrl,
-        raceName : rows[0].raceName,
-        Circuit : {
-            circuitId : rows[0].circuitRef,
-            url : rows[0].url,
-            circuitName : rows[0].name,
-            Location : {
-                lat : rows[0].lat.toString(),
-                long : rows[0].lng.toString(),
-                alt : (rows[0].alt != null) ?  rows[0].alt.toString() : "N/D",
-                locality : rows[0].location,
-                country : rows[0].country
-            }
-        },
-        date : rows[0].date,
-        time : (rows[0].time != null) ? rows[0].time + "Z" : "N/D",
-        QualifyingResults : formattedQualifyingResults(rows)
-    };
-}
+    let currentYear = 0;
+    let currentRound = 0;
+    let QualifyingResults = [];
 
-function formattedQualifyingWithoutYear(rows)
-{
-    return rows.map((row)=>{
-        return {
-            season : row.year.toString(),
-            round : row.round.toString(),
-            url : row.raceUrl,
-            raceName : row.raceName,
-            Circuit : {
-                circuitId : row.circuitRef,
-                url : row.url,
-                circuitName : row.name,
-                Location : {
-                    lat : row.lat.toString(),
-                    long : row.lng.toString(),
-                    alt : (row.alt != null) ?  row.alt.toString() : "N/D",
-                    locality : row.location,
-                    country : row.country
-                }
-            },
-            date : row.date,
-            time : (row.time != null) ? row.time + "Z" : "N/D",
-            QualifyingResults : [formattedQualifyingResults(row)]
+    rows.forEach((row) => {
+        if(row.year != currentYear || row.round != currentRound)
+        {
+            currentYear = row.year;
+            currentRound = row.round;
+            QualifyingResults.push(heading(row));
+            console.log(currentYear + " " + currentRound);
+        }
+        else
+        {
+            QualifyingResults[QualifyingResults.length - 1].QualifyingResults.push(formattedQualifyingRow(row));
         }
     });
+    return QualifyingResults;
 }
+
 router.get("", (req,res) => {
 
     let offset = (typeof req.query.offset != 'undefined') ? parseInt(req.query.offset) : 0;
@@ -207,10 +188,8 @@ router.get("", (req,res) => {
         if(round)
             json.MRData.RaceTable.round = round;
 
-        if(year && round && rows)
-            json.MRData.RaceTable.Races = [formattedQualifying(rows)];
-        else
-            json.MRData.RaceTable.Races = formattedQualifyingWithoutYear(rows);
+        json.MRData.RaceTable.Races = formattedQualifying(rows);
+
         res.json(json);
     });
 });

@@ -5,56 +5,54 @@ const path = require("path");
 let MySQLConfiguration = require("../connection.js");
 
 //Supported Function
-function formattedDriverStandings(rows)
-{
-    const position = rows.map((row) => {
-        return { 
-            position : row.position.toString(),
-            positionText : row.positionText,
-            points : row.points.toString(),
-            wins : row.wins.toString(),
-            Driver : {
-                driverId : row.driverRef,
-                permanentNumber : (row.number != null) ? row.number.toString() : "",
-                code : (row.code != null) ? row.code : "",
-                url : row.url,
-                givenName : row.forename,
-                familyName : row.surname,
-                dateOfBirth : row.dob,
-                nationality : row.nationality
-            }
-        };
-    });
-    return position;
-};
 
-function formattedStandingsLists(rows)
+function formattedDriverStandings(row)
 {
-    const position = rows.map((row) => {
-        return { 
-            season : row.year.toString(),
-            round : row.round.toString(),
-            DriverStandings : [
-                { 
-                    position : row.position.toString(),
-                    positionText : row.positionText,
-                    points : row.points.toString(),
-                    wins : row.wins.toString(),
-                    Driver : {
-                        driverId : row.driverRef,
-                        permanentNumber : (row.number != null) ? row.number.toString() : "",
-                        code : (row.code != null) ? row.code : "",
-                        url : row.url,
-                        givenName : row.forename,
-                        familyName : row.surname,
-                        dateOfBirth : row.dob,
-                        nationality : row.nationality
-                    }
-                }
-            ]
+    return { 
+        position : row.position.toString(),
+        positionText : row.positionText,
+        points : row.points.toString(),
+        wins : row.wins.toString(),
+        Driver : {
+            driverId : row.driverRef,
+            permanentNumber : (row.number != null) ? row.number.toString() : "",
+            code : (row.code != null) ? row.code : "",
+            url : row.url,
+            givenName : row.forename,
+            familyName : row.surname,
+            dateOfBirth : row.dob,
+            nationality : row.nationality
+        }
+    };
+}
+
+function heading(row)
+{
+    return {
+        season : row.year.toString(),
+        round : row.round.toString(),
+        DriverStandings : [formattedDriverStandings(row)]
+    };
+}
+
+function formattedStandings(rows)
+{
+    let currentYear = 0;
+    let DriverStandings = [];
+
+    rows.forEach((row) => {
+        if(row.year != currentYear)
+        {
+            currentYear = row.year;
+            DriverStandings.push(heading(row));
+            console.log(currentYear);
+        }
+        else
+        {
+            DriverStandings[DriverStandings.length - 1].DriverStandings.push(formattedDriverStandings(row));
         }
     });
-    return position;
+    return DriverStandings;
 }
 
 function getConstructors(year,round,driverId,callback)
@@ -182,16 +180,12 @@ router.get("", (req,res) => {
             json.MRData.StandingsTable.round = round;
         if(driverStandings)
             json.MRData.StandingsTable.driverStandings = driverStandings;
-        if(year && rows)
-        {
-            json.MRData.StandingsTable.StandingsLists = [{
-                "season" : year,
-                "round" : rows[0].round.toString(),
-                "DriverStandings" : formattedDriverStandings(rows)
-            }];
 
-            
-            /*json.MRData.StandingsTable.StandingsLists[0].DriverStandings.forEach(driver => {
+        json.MRData.StandingsTable.StandingsLists = formattedStandings(rows);
+        res.json(json);
+    });
+});
+/*json.MRData.StandingsTable.StandingsLists[0].DriverStandings.forEach(driver => {
                 let year = json.MRData.StandingsTable.StandingsLists[0].season;
                 let round = json.MRData.StandingsTable.StandingsLists[0].round;
                 //driver.Constructor = getConstructors(year,round,driver.Driver.driverId);
@@ -200,10 +194,4 @@ router.get("", (req,res) => {
                 });
                 console.log(driver);
             });*/
-        }
-        else
-            json.MRData.StandingsTable.StandingsLists = formattedStandingsLists(rows);
-        res.json(json);
-    });
-});
 module.exports = router;
