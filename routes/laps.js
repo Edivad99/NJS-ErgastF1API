@@ -143,7 +143,7 @@ router.get("", (req,res) => {
         }
         if(req.query.sql=="true")
         {
-            res.status(200).send({sql: sql}).end();
+            res.status(200).send(sql).end();
             return;
         }
             

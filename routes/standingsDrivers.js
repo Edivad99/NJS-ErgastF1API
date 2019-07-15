@@ -8,7 +8,7 @@ let MySQLConfiguration = require("../connection.js");
 
 function formattedDriverStandings(row)
 {
-    return { 
+    let result = { 
         position : row.position.toString(),
         positionText : row.positionText,
         points : row.points.toString(),
@@ -24,6 +24,7 @@ function formattedDriverStandings(row)
             nationality : row.nationality
         }
     };
+    return result;
 }
 
 function heading(row)
@@ -45,7 +46,7 @@ function formattedStandings(rows)
         {
             currentYear = row.year;
             DriverStandings.push(heading(row));
-            console.log(currentYear);
+            //console.log(currentYear);
         }
         else
         {
@@ -125,7 +126,7 @@ router.get("", (req,res) => {
         return;
     }
 
-    let sql =  `SELECT DISTINCT drivers.driverId, drivers.driverRef, drivers.number, drivers.code, drivers.forename, drivers.surname, DATE_FORMAT(drivers.dob, '%Y-%m-%d') AS 'dob', drivers.nationality, 
+    let sql =  `SELECT DISTINCT drivers.driverId, drivers.driverRef, drivers.number, drivers.code, drivers.forename, drivers.surname, DATE_FORMAT(drivers.dob, '%Y-%m-%d') AS 'dob', drivers.nationality,
                 drivers.url, driverStandings.points, driverStandings.position, driverStandings.positionText, driverStandings.wins, races.year, races.round
                 FROM drivers, driverStandings, races
                 WHERE driverStandings.raceId=races.raceId AND driverStandings.driverId=drivers.driverId`;
@@ -160,7 +161,7 @@ router.get("", (req,res) => {
         }
         if(req.query.sql=="true")
         {
-            res.status(200).send({sql: sql}).end();
+            res.status(200).send(sql).end();
             return;
         }
 
