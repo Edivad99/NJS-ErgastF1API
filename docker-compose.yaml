@@ -1,18 +1,34 @@
-database:
-  container_name: database
-  build: ergastdb/
-  environment:
-    MYSQL_ROOT_PASSWORD: f1
-    MYSQL_DATABASE: ergastdb
-  expose:
-    - "3306"
-  ports:
-    - '3306:3306'
-  command: --default-authentication-plugin=mysql_native_password
-web:
-  container_name: web
-  build: .
-  ports:
-    - '8080:8732'
-  links:
-    - database:database
+version: "3.7"
+services:
+  api-server:
+    build:
+      dockerfile: apiServer.Dockerfile
+      context: .
+    container_name: api-server
+    restart: always
+    ports:
+      - "8080:8732"
+
+  mysql-server:
+    build:
+      dockerfile: mysql.Dockerfile
+      context: .
+    container_name: mysql-server
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: f1
+      MYSQL_DATABASE: ergastdb
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.0.4
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql-server
+      PMA_USER: root
+      PMA_PASSWORD: f1
+    ports:
+      - "5000:80"

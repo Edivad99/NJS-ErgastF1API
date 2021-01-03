@@ -8,7 +8,7 @@ let MySQLConfiguration = require("../connection.js");
 
 function formattedDriverStandings(row)
 {
-    let result = { 
+    return { 
         position : row.position.toString(),
         positionText : row.positionText,
         points : row.points.toString(),
@@ -24,7 +24,6 @@ function formattedDriverStandings(row)
             nationality : row.nationality
         }
     };
-    return result;
 }
 
 function heading(row)
