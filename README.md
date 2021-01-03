@@ -6,7 +6,7 @@ Conversion of the ergast.com API from PHP to nodeJS
 
 - install docker
 - download and unzip the contents repository 
-- cd into the root folder and run: `docker-compose up --build -d --remove-orphans`
+- cd into the root folder and run: `docker compose up`
 - give everything a minute or to to come up and then test the API at: `http://localhost:8080/`
 
 ## Test
