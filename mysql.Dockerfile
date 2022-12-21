@@ -1,4 +1,4 @@
-FROM mysql:8.0.22
+FROM mariadb/server:latest
 
 RUN apt-get update && apt-get install -y wget && apt-get clean
 
