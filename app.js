@@ -1,12 +1,12 @@
 const express = require("express");
 const app = express();
-const path = require("path");
+const cors = require("cors");
 
 const morgan = require("morgan");
 app.use(morgan("dev"));
 const PORT = 8732;
 
-
+app.use(cors()); //TODO: make this configurable to limit access to known consumers?
 
 const routesDrivers = require("./routes/drivers.js");
 const routesConsturctors = require("./routes/constructors.js");
