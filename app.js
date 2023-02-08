@@ -20,6 +20,7 @@ const routesCircuit = require("./routes/circuits.js");
 const routesSeason = require("./routes/season.js");
 const routesQualifying = require("./routes/qualifying.js");
 const routesRaceResults = require("./routes/raceResults.js");
+const routesSprintResults = require("./routes/sprintResults.js");
 
 //add Filters
 app.use("/drivers", routesDrivers);//DONE
@@ -34,6 +35,7 @@ app.use("/circuits", routesCircuit);//DONE
 app.use("/seasons",routesSeason);//DONE
 app.use("/qualifying",routesQualifying);//DONE
 app.use("/results",routesRaceResults);//DONE
+app.use("/results/sprint", routesSprintResults);//DONE
 
 //TODO: add last and next params
 
