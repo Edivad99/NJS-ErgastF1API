@@ -8,10 +8,10 @@ let MySQLConfiguration = require("../connection.js");
 function formattedResultsRow(row)
 {
     return { 
-        number : row.number.toString(),
+        number : (row.number != null) ? row.number.toString() : "N/D",
         position : (row.position != null) ? row.position.toString() : "N/D",
         positionText : row.positionText,
-        points : row.points.toString(),
+        points : (row.points != null) ? row.points.toString() : "N/D",
         Driver : {
             driverId: row.driverRef,
             permanentNumber : (row.driverNumber != null) ? row.driverNumber.toString() : "",

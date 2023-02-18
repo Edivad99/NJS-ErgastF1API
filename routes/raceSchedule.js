@@ -8,7 +8,7 @@ let MySQLConfiguration = require("../connection.js");
 function formattedRaces(rows)
 {
     return rows.map((row) => {
-        return { 
+        let race_obj = { 
             season : row.year.toString(),
             round : row.round.toString(),
             url: row.url,
@@ -28,6 +28,38 @@ function formattedRaces(rows)
             date : row.date,
             time : row.time + "Z"
         };
+
+        if (row.fp1_date) {
+            race_obj["FirstPractice"] = {
+                date: row.fp1_date,
+                time: row.fp1_time + "Z"
+            }
+        }
+        if (row.fp2_date) {
+            race_obj["SecondPractice"] = {
+                date: row.fp2_date,
+                time: row.fp2_time + "Z"
+            }
+        }
+        if (row.fp3_date) {
+            race_obj["ThirdPractice"] = {
+                date: row.fp3_date,
+                time: row.fp3_time + "Z"
+            }
+        }
+        if (row.quali_date) {
+            race_obj["Qualifying"] = {
+                date: row.quali_date,
+                time: row.quali_time + "Z"
+            }
+        }
+        if (row.sprint_date) {
+            race_obj["Sprint"] = {
+                date: row.sprint_date,
+                time: row.sprint_time + "Z"
+            }
+        }
+        return race_obj
     });
 }
 router.get("", (req,res) => {
@@ -75,7 +107,25 @@ router.get("", (req,res) => {
         return;
     }
 
-    let sql = "SELECT races.year, races.round, races.name AS 'raceName', DATE_FORMAT(races.date, '%Y-%m-%d') AS 'date', DATE_FORMAT(races.time, '%H:%i:%S') AS 'time', races.url AS 'raceURL', circuits.* FROM races, circuits";
+    let sql = `
+        SELECT races.year, races.round, races.name AS 'raceName',
+        DATE_FORMAT(races.date, '%Y-%m-%d') AS 'date',
+        DATE_FORMAT(races.time, '%H:%i:%S') AS 'time',
+        DATE_FORMAT(races.fp1_date, '%Y-%m-%d') AS 'fp1_date',
+        DATE_FORMAT(races.fp1_time, '%H:%i:%S') AS 'fp1_time',
+        DATE_FORMAT(races.fp2_date, '%Y-%m-%d') AS 'fp2_date',
+        DATE_FORMAT(races.fp2_time, '%H:%i:%S') AS 'fp2_time',
+        DATE_FORMAT(races.fp3_date, '%Y-%m-%d') AS 'fp3_date',
+        DATE_FORMAT(races.fp3_time, '%H:%i:%S') AS 'fp3_time',
+        DATE_FORMAT(races.quali_date, '%Y-%m-%d') AS 'quali_date',
+        DATE_FORMAT(races.quali_time, '%H:%i:%S') AS 'quali_time',
+        DATE_FORMAT(races.sprint_date, '%Y-%m-%d') AS 'sprint_date',
+        DATE_FORMAT(races.sprint_time, '%H:%i:%S') AS 'sprint_time',
+        races.url AS 'raceURL', 
+        circuits.* FROM races,
+        circuits
+    `;
+    
 
     if(driver || constructor || grid || result || status || fastest) sql += ", results re";
     if(driver) sql += ", drivers";
